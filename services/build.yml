@@ -4,7 +4,7 @@ before_script:
   - envsubst < deploy/credentials > .aws/credentials 
   - aws ecr get-login --region $AWS_REGION --no-include-email | sh;
   
-build:
+build-version:
   stage: build
   image: swishanalytics/kops
   services:

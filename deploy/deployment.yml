@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: $CI_PROJECT_NAME
+  labels:
+    name: $CI_PROJECT_NAME
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: $CI_PROJECT_NAME
+
+  template:
+    metadata:
+      labels:
+        name: $CI_PROJECT_NAME
+      annotations:
+        gitlab.com/job-id: "$CI_JOB_ID"
+        kube_namespace: $CI_JOB_STAGE
+    spec:
+      securityContext:
+        runAsUser: 999
+      nodeSelector:
+        kops.k8s.io/instancegroup: nodes
+      containers:
+      - name: $CI_PROJECT_NAME
+        image: $AWS_ACCOUNT.dkr.ecr.us-west-2.amazonaws.com/$CI_PROJECT_NAME:$CI_PIPELINE_ID
+        ports:
+        - containerPort: 8080
+          name: http
+        env:       
+          - name: "REDIS_HOST"
+            value: "localhost"
+      - name: redis
+        image: redis
+        ports:
+          - containerPort: 6379
+            name: redis
+            protocol: TCP
